@@ -28,11 +28,13 @@ declist = []
 Hdeclist = []
 Mdeclist = []
 Sdeclist = []
+declist2 = []
 
 ralist = []
 Hralist = []
 Mralist = []
 Sralist = []
+ralist2 = []
 
 distList = []
 
@@ -54,6 +56,7 @@ listOfRa = interData['ra'].to_list()
 #deciml to date time
 
 for x in listOfDec:
+    p = x
     if x < 0 :
         time = x * -1
 
@@ -82,8 +85,10 @@ for x in listOfDec:
     Hdeclist.append(Hdec)
     Mdeclist.append(Mdec)
     Sdeclist.append(Sdec)
+    declist2.append(p)
 
 for x in listOfRa:
+    p = x
     time = x
     h = int(time)
     m = (time*60) %  60
@@ -102,13 +107,14 @@ for x in listOfRa:
     Hralist.append(Hra)
     Mralist.append(Mra)
     Sralist.append(Sra)
+    ralist2.append(p)
 
 for x in dist2:
     dist = x
     distList.append(dist)
 
 #add every thing to a dictinary
-dictionary = {'dec':declist,'Hdec':Hdeclist,'Mdec':Mdeclist,'Sdec':Sdeclist, 'ra': ralist,'Hra':Hralist,'Mra':Mralist,'Sra':Sralist, 'dist':distList}
+dictionary = {'decdec':declist2,'dec':declist,'Hdec':Hdeclist,'Mdec':Mdeclist,'Sdec':Sdeclist,'radec':ralist2, 'ra': ralist,'Hra':Hralist,'Mra':Mralist,'Sra':Sralist, 'dist':distList}
 
 
 dataFrame = pd.DataFrame(dictionary)
@@ -130,9 +136,10 @@ df3 = pd.DataFrame()
 #Find Rho, Phi and Theta
 df1['Rho'] = df.apply(lambda row: (row.dist * 3.262), axis = 1)
 
-df2['Phi'] = df.apply(lambda row: ((row.Hra*15) + (row.Mra*0.25) + (row.Sra*0.0041666))*(np.pi/180), axis = 1)
-
-df3['Theta'] = df.apply(lambda row: ((abs(row.Hdec) + (row.Mdec/60) + (row.Sdec/3600)*(np.sign(row.Hdec)))*(np.pi/180)), axis = 1)
+#df2['Phi'] = df.apply(lambda row: ((row.Hra*15) + (row.Mra*0.25) + (row.Sra*0.0041666))*(np.pi/180), axis = 1)
+df2['Phi'] = ralist2 * 15
+#df3['Theta'] = df.apply(lambda row: ((abs(row.Hdec) + (row.Mdec/60) + (row.Sdec/3600)*(np.sign(row.Hdec)))*(np.pi/180)), axis = 1)
+df3['Theta'] = declist2 
 
 #get all the data into the same dataframe and add it to a new csv file
 df1 = df1.join(df2)
@@ -141,24 +148,24 @@ df1.to_csv('starmaps/mapFinale.csv')
 
 #region     Cartisean calculations
 
-#open final csv file calculate RVECT and add it
+#open final csv file calculate RVECT and add it THIS SHOULD BE POSITIVE
 df = pd.read_csv('starmaps/mapFinale.csv')
-df1['RVECT'] = df.apply(lambda row: (row.Rho * (np.cos(np.radians(row.Phi)))), axis = 1)
+df1['RVECT'] = df.apply(lambda row: (row.Rho * (np.cos((row.Theta)))), axis = 1)
 df1.to_csv('starmaps/mapFinale.csv')
 
 #open final csv file calculate X and add it
 df = pd.read_csv('starmaps/mapFinale.csv')
-df1['X'] = df.apply(lambda row: ((row.RVECT) * (np.cos(np.radians(row.Phi)))), axis = 1)
+df1['X'] = df.apply(lambda row: ((row.RVECT) * (np.cos((row.Phi)))), axis = 1)
 df1.to_csv('starmaps/mapFinale.csv')
 
 #open final csv file calculate Y and add it
 df = pd.read_csv('starmaps/mapFinale.csv')
-df1['Y'] = df.apply(lambda row: ((row.RVECT) * (np.sin(np.radians(row.Phi)))), axis = 1)
+df1['Y'] = df.apply(lambda row: ((row.RVECT) * (np.sin((row.Phi)))), axis = 1)
 df1.to_csv('starmaps/mapFinale.csv')
 
 #open final csv file calculate Z and add it
 df = pd.read_csv('starmaps/mapFinale.csv')
-df1['Z'] = df.apply(lambda row: ((row.Rho) * (np.sin(np.radians(row.Theta)))), axis = 1)
+df1['Z'] = df.apply(lambda row: ((row.Rho) * (np.sin((row.Theta)))), axis = 1)
 df1.to_csv('starmaps/mapFinale.csv')
 #endregion
 

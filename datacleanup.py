@@ -50,7 +50,7 @@ for x in listOfSpec:
 
     d = y[:2]
 
-    print(list(d))
+    #print(list(d))
     cleanedSpec.append(d)
 
 dict = {'spect':cleanedSpec}
