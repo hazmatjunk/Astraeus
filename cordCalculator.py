@@ -1,179 +1,82 @@
 import pandas as pd
-import numpy as np
+import os
+import os.path
+import urllib.request
+import gzip
+import shutil
 from pandas._config.config import describe_option
 
-#import data
-HygData = pd.read_csv('starmaps/hygdata_v3.csv')
-#extract the columns
-df1 = HygData[['dec', 'ra', 'dist', 'absmag','proper','gl','spect']]
+#Collate data and Conversions
 
-listOfAbsMag = df1['absmag'].to_list()
-listOfProper = df1['proper'].to_list()
-listOfGliese = df1['gl'].to_list()
-listOfSpectrum = df1['spect'].to_list()
+#max range from earth
+distanceFromEarth = 20
 
-#write data to new csv file
-df1.to_csv('starmaps/angles.csv')
+#get hygdata
+if os.path.isfile('starmaps/hygdata_v3.csv') == True:
+    print("We have Light")
+else:
+    print("We need light. Starting big bang")
+    urllib.request.urlretrieve("http://astronexus.com/downloads/catalogs/hygdata_v3.csv.gz", "starmaps/hygdata_v3.csv.gz")
+    with gzip.open('starmaps/hygdata_v3.csv.gz','rb') as f_in:
+        with open('starmaps/hygdata_v3.csv', 'wb') as f_out:
+            shutil.copyfileobj(f_in, f_out)
+    os.remove('starmaps/hygdata_v3.csv.gz')
+    print("Big Bang complete")
 
-#region     Collate data and Conversions
+import functionsStellar as fs
 
-interData = pd.read_csv('starmaps/angles.csv')
+if os.path.isfile('starmaps/mapFinale.csv') == True:
+    print("file already here")
+else:
+    #import data
+    HygData = pd.read_csv('starmaps/hygdata_v3.csv')
+    #extract the columns
+    df1 = HygData[['dec', 'ra', 'dist', 'absmag','proper','gl','spect']]
 
-dist2 = interData['dist'].to_list()
+    #Create lists for later use
 
-#convert from decimil time to HH:MM:SS
+    listOfAbsMag = df1['absmag'].to_list()
+    listOfProper = df1['proper'].to_list()
+    listOfGliese = df1['gl'].to_list()
+    listOfSpectrum = df1['spect'].to_list()
 
-#region     Create empty lists for later use
-declist = []
-Hdeclist = []
-Mdeclist = []
-Sdeclist = []
-declist2 = []
+    #deciml to date time and add every thing to a dictinary
 
-ralist = []
-Hralist = []
-Mralist = []
-Sralist = []
-ralist2 = []
+    fs.dictUpdate()
 
-distList = []
+    #Main calculations
 
-PhiList = []
-ThetaList = []
-RhoList = []
+    fs.RhoPhiTheta()
 
-XList = []
-YList = []
-ZList = []
-RVectList = []
+    #Cartisean calculations
 
-#convert dec and ra to a list
-listOfDec = interData['dec'].to_list()
-listOfRa = interData['ra'].to_list()
+    fs.RVECTXYZ()
 
-#endregion
+    #remove temp files
+    os.remove("starmaps/finalangles.csv")
 
-#deciml to date time
+    #add extra miscllanious data that did not need to be edited
+    df = pd.read_csv('starmaps/mapFinale.csv')
+    dicMag = {'abs mag':listOfAbsMag, 'proper':listOfProper, 'gliese':listOfGliese, 'spect':listOfSpectrum}
+    df1 = pd.DataFrame(dicMag)
+    df = df.join(df1)
+    df.to_csv('starmaps/mapFinale.csv')
 
-for x in listOfDec:
-    p = x
-    if x < 0 :
-        time = x * -1
+    datafinal = pd.read_csv('starmaps/mapFinale.csv')
+    fs.unusedClean(x=datafinal)
 
-        h = int(time)
-        m = (time*60) %  60
-        s = (time*3600) % 60
+    print("file created")
 
-        Tdec = ("-%d:%02d:%02d" % (h, m, s))
-        Hdec = -h
-        Mdec = m
-        Sdec = s
-    
-    else:
-        time = x
-        h = int(time)
-        m = (time*60) %  60
-        s = (time*3600) % 60
+#dataCleanup second
+#data File to clean
 
-        Tdec = ("%d:%02d:%02d" % (h, m, s))
-        Hdec = h
-        Mdec = m
-        Sdec = s
+fs.distaneClean(x=distanceFromEarth)
 
-    #print(Tdec)
-    declist.append(Tdec)
-    Hdeclist.append(Hdec)
-    Mdeclist.append(Mdec)
-    Sdeclist.append(Sdec)
-    declist2.append(p)
+fs.spectraClean()
 
-for x in listOfRa:
-    p = x
-    time = x
-    h = int(time)
-    m = (time*60) %  60
-    s = (time*3600) % 60
+fs.nameMerge()
 
-    Tra = ("%d:%02d:%02d" % (h, m, s))
-    Hra = h
-    Hra = int(Hra)
-    Mra = m
-    Mra = int(Mra)
-    Sra = s
-    Sra = int(Sra)
+fs.emptyFill()
 
-    #print(Tra)
-    ralist.append(Tra)
-    Hralist.append(Hra)
-    Mralist.append(Mra)
-    Sralist.append(Sra)
-    ralist2.append(p)
-
-for x in dist2:
-    dist = x
-    distList.append(dist)
-
-#add every thing to a dictinary
-dictionary = {'decdec':declist2,'dec':declist,'Hdec':Hdeclist,'Mdec':Mdeclist,'Sdec':Sdeclist,'radec':ralist2, 'ra': ralist,'Hra':Hralist,'Mra':Mralist,'Sra':Sralist, 'dist':distList}
-
-
-dataFrame = pd.DataFrame(dictionary)
-dataFrame.to_csv('starmaps/finalAngles.csv')
-
-#endregion
-
-
-#region     Main calculations
-
-#get all the correct data from last step
-df = pd.read_csv('starmaps/finalAngles.csv')
-
-#create 3 empty Dataframes for Use
-df1 = pd.DataFrame()
-df2 = pd.DataFrame()
-df3 = pd.DataFrame()
-
-#Find Rho, Phi and Theta
-df1['Rho'] = df.apply(lambda row: (row.dist * 3.262), axis = 1)
-
-#df2['Phi'] = df.apply(lambda row: ((row.Hra*15) + (row.Mra*0.25) + (row.Sra*0.0041666))*(np.pi/180), axis = 1)
-df2['Phi'] = ralist2 * 15
-#df3['Theta'] = df.apply(lambda row: ((abs(row.Hdec) + (row.Mdec/60) + (row.Sdec/3600)*(np.sign(row.Hdec)))*(np.pi/180)), axis = 1)
-df3['Theta'] = declist2 
-
-#get all the data into the same dataframe and add it to a new csv file
-df1 = df1.join(df2)
-df1 = df1.join(df3)
-df1.to_csv('starmaps/mapFinale.csv')
-
-#region     Cartisean calculations
-
-#open final csv file calculate RVECT and add it THIS SHOULD BE POSITIVE
-df = pd.read_csv('starmaps/mapFinale.csv')
-df1['RVECT'] = df.apply(lambda row: (row.Rho * (np.cos((row.Theta)))), axis = 1)
-df1.to_csv('starmaps/mapFinale.csv')
-
-#open final csv file calculate X and add it
-df = pd.read_csv('starmaps/mapFinale.csv')
-df1['X'] = df.apply(lambda row: ((row.RVECT) * (np.cos((row.Phi)))), axis = 1)
-df1.to_csv('starmaps/mapFinale.csv')
-
-#open final csv file calculate Y and add it
-df = pd.read_csv('starmaps/mapFinale.csv')
-df1['Y'] = df.apply(lambda row: ((row.RVECT) * (np.sin((row.Phi)))), axis = 1)
-df1.to_csv('starmaps/mapFinale.csv')
-
-#open final csv file calculate Z and add it
-df = pd.read_csv('starmaps/mapFinale.csv')
-df1['Z'] = df.apply(lambda row: ((row.Rho) * (np.sin((row.Theta)))), axis = 1)
-df1.to_csv('starmaps/mapFinale.csv')
-#endregion
-
-#endregion
-
-#add extra miscllanious data that did not need to be edited
-df = pd.read_csv('starmaps/mapFinale.csv')
-dicMag = {'abs mag':listOfAbsMag, 'proper':listOfProper, 'gliese':listOfGliese, 'spect':listOfSpectrum}
-df1 = pd.DataFrame(dicMag)
-df = df.join(df1)
-df.to_csv('starmaps/mapFinale.csv')
+cleandata = pd.read_csv('starmaps/dataclean.csv')
+fs.unusedClean(x=cleandata)
