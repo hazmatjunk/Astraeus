@@ -14,7 +14,7 @@ distanceFromEarth = 20
 
 #set up worksapce
 if os.path.isfile('starmaps/hygdata_v3.csv') == True:
-        print("We have Light")
+    print("We have Light")
 else:
     print("We need light. Starting big bang")
     #check to see if starmaps exists and create if it dosent exist
@@ -48,7 +48,7 @@ else:
 
 #https://dl.freefontsfamily.com/download/Helvetica-Font
 
-import functionsStellar as fs
+import dataFunctions as ds
 
 if os.path.isfile('starmaps/mapFinale.csv') == True:
     print("file already here")
@@ -67,15 +67,15 @@ else:
 
     #deciml to date time and add every thing to a dictinary
 
-    fs.dictUpdate()
+    ds.dictUpdate()
 
     #Main calculations
 
-    fs.RhoPhiTheta()
+    ds.RhoPhiTheta()
 
     #Cartisean calculations
 
-    fs.RVECTXYZ()
+    ds.RVECTXYZ()
 
     #remove temp files
     os.remove("starmaps/finalangles.csv")
@@ -88,20 +88,22 @@ else:
     df.to_csv('starmaps/mapFinale.csv')
 
     datafinal = pd.read_csv('starmaps/mapFinale.csv')
-    fs.unusedClean(x=datafinal)
+    ds.unusedClean(x=datafinal)
 
     print("file created")
 
 #dataCleanup second
 #data File to clean
 
-fs.distaneClean(x=distanceFromEarth)
+ds.distaneClean(x=distanceFromEarth)
 
-fs.spectraClean()
+ds.spectraClean()
 
-fs.nameMerge()
+ds.nameMerge()
 
-fs.emptyFill()
+ds.emptyFill()
 
 cleandata = pd.read_csv('starmaps/dataclean.csv')
-fs.unusedClean(x=cleandata)
+ds.unusedClean(x=cleandata)
+
+print("Data modified and cleaned!")

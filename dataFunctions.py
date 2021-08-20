@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 
-
 #import data
 HygData = pd.read_csv('starmaps/hygdata_v3.csv')
 #extract the columns
@@ -242,4 +241,3 @@ def nameMerge():
     df.proper = np.where(df.proper.isnull(),df.gliese, df.proper)
     df.to_csv('starmaps/dataclean.csv')
     print("Names Merged")
-
