@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
-import os.path
-import urllib.request
+
 
 #import data
 HygData = pd.read_csv('starmaps/hygdata_v3.csv')

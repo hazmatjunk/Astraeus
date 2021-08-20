@@ -200,7 +200,7 @@ draw.line((0,img.height/2,img.width,img.height/2), fill= lineColor, width= 10)
 
 #loop through lists drawing each star
 for i in range(len(x1)):
-    #draw a circle for the star
+    #draw a circle for the star background
     draw.ellipse((x1[i]-(crossHairSizeH*4),y1[i]-(crossHairSizeH*4),x2[i]+(crossHairSizeH*4),y2[i]+(crossHairSizeH*4)),fill=canvasColor)
 
 
@@ -215,14 +215,23 @@ for i in range(len(x1)):
     img.paste(crossHairColour, (x1[i]-crossHairSizeH,y1[i]-crossHairSizeH), crossHairColour)
     
 
-    #find text center
+    #find text upper left
     textoffset = draw.textsize(starName[i], font=fontTitle)
     textoffset = str(textoffset)
     textoffset = textoffset[1:]
+    textoffsety = textoffset
     textoffset = textoffset[:3]
     textoffset = textoffset.rstrip(',')
-    textoffset = int(textoffset)*0.5
+    textoffset = int(textoffset)
+    textoffsety = textoffsety.rstrip(')')
+    textoffsety = textoffsety[3:]
+    textoffsety = textoffsety.lstrip(',')
+    textoffsety = int(textoffsety)
 
+
+    #draw a rectangle behind the text
+    draw.rectangle((x1[i]+(crossHairSizeH)+(crossHairSizeH*0.5), y1[i]-(crossHairSizeH),x2[i]+(crossHairSizeH)+(crossHairSizeH*0.5)+textoffset,y2[i]+textoffsety), fill=canvasColor)
+    #write text with name
     draw.text(((x1[i]+(crossHairSizeH)+(crossHairSizeH*0.5)), y1[i]-(crossHairSizeH)), starName[i],align="center", font=fontTitle, fill=(0,0,0))
 
     #print(x1[i],y1[i],x2[i],y2[i])
