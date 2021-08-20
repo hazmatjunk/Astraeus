@@ -65,10 +65,15 @@ else:
     listOfGliese = df1['gl'].to_list()
     listOfSpectrum = df1['spect'].to_list()
 
+    #find closest stars in designated range
+
+
     #deciml to date time and add every thing to a dictinary
 
     ds.dictUpdate()
 
+    #clean out distance greater than 20 ly
+    ds.distaneClean(x=distanceFromEarth)
     #Main calculations
 
     ds.RhoPhiTheta()
@@ -94,8 +99,6 @@ else:
 
 #dataCleanup second
 #data File to clean
-
-ds.distaneClean(x=distanceFromEarth)
 
 ds.spectraClean()
 

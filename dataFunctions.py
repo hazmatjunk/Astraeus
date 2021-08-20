@@ -177,13 +177,12 @@ def RVECTXYZ():
     print("Z found")
 
 def distaneClean(x):
-    #clean out distance greater than 20 ly
-    df = pd.read_csv('starmaps/mapFinale.csv')
-    print("This is the data size ", df.shape)
-    df2 = df.loc[df["Rho"] <= x ]
+    df1 = pd.read_csv('starmaps/finalAngles.csv')
+    print("This is the data size ", df1.shape)
+    df2 = df1.loc[df1["dist"] <= (x / 3.262) ]
     print("This is the new data size ", df2.shape)
-    df2.to_csv('starmaps/dataclean.csv')
-    print("Distance cleaned")
+    df2.to_csv('starmaps/finalAngles.csv')
+    print("Distance cleaned 1")
 
 def unusedClean(x):
     df = x
