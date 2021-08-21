@@ -13,7 +13,9 @@ from pandas.core.indexes.base import Index
 
 #max range from earth
 distanceFromEarth = 20
-
+#rotat data set by this value
+raRot = 30
+decRot = 0
 #set up worksapce
 if os.path.isfile('starmaps/hygdata_v3.csv') == True:
     print("We have Light")
@@ -68,12 +70,14 @@ else:
     listOfSpectrum = df1['spect'].to_list()
     listOfHd = df1['hd'].to_list()
 
+
     #find closest stars in designated range
 
 
     #deciml to date time and add every thing to a dictinary
 
-    ds.dictUpdate()
+    ds.dictUpdate(raRotDec= raRot, decRotDec= decRot)
+    ds.dictUpdate(raRotDec= raRot, decRotDec= decRot)
 
     #clean out distance greater than 20 ly
     #ds.distaneClean(x=distanceFromEarth)
@@ -86,7 +90,7 @@ else:
     ds.RVECTXYZ()
 
     #remove temp files
-    os.remove("starmaps/finalangles.csv")
+    #os.remove("starmaps/finalangles.csv")
 
     #add extra miscllanious data that did not need to be edited
     df = pd.read_csv('starmaps/mapFinale.csv')
@@ -110,20 +114,20 @@ ds.nameMerge()
 
 ds.emptyFill()
 
-df = pd.read_csv('starmaps/dataclean.csv')
-df.insert(loc= 0, column='index', value=np.arange(len(df)))
-df.to_csv('starmaps/dataclean.csv')
-
 ds.distanceCleaner2(x=distanceFromEarth)
-
-cleandata = pd.read_csv('starmaps/dataclean.csv')
-
-ds.unusedClean(x=cleandata)
-
-print(cleandata.shape)
 
 os.remove("starmaps/mapFinale.csv")
 
 ds.removeDuplicates()
+
+df = pd.read_csv('starmaps/dataclean.csv')
+df.insert(loc= 0, column='index', value=np.arange(len(df)))
+df.to_csv('starmaps/dataclean.csv')
+
+cleandata = pd.read_csv('starmaps/dataclean.csv')
+
+cleandata = cleandata.drop(['gliese','hd'],axis=1)
+
+ds.unusedClean(x=cleandata)
 
 print("Data modified and cleaned!")

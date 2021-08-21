@@ -7,7 +7,7 @@ HygData = pd.read_csv('starmaps/hygdata_v3.csv')
 df1 = HygData[['dec', 'ra', 'dist', 'absmag','proper','gl','spect']]
 
 
-def decimilDateTimeDEC():
+def decimilDateTimeDEC(decRotDec):
 
     listOfDec = HygData['dec'].to_list()
 
@@ -18,7 +18,7 @@ def decimilDateTimeDEC():
     declist2 = []
 
     for x in listOfDec:
-        p = x
+        x = x + decRotDec
         if x < 0 :
             time = x * -1
 
@@ -47,13 +47,13 @@ def decimilDateTimeDEC():
         Hdeclist.append(Hdec)
         Mdeclist.append(Mdec)
         Sdeclist.append(Sdec)
-        declist2.append(p)
+        declist2.append(x)
     
     decDict = {'decdec':declist2,'dec':declist,'Hdec':Hdeclist,'Mdec':Mdeclist,'Sdec':Sdeclist,}
     print("Decimal date time found for declination")
     return(decDict)
 
-def decimilDateTimeRA():
+def decimilDateTimeRA(raRotDec):
 
     listOfRa = HygData['ra'].to_list()
 
@@ -65,7 +65,8 @@ def decimilDateTimeRA():
 
     for x in listOfRa:
         p = x
-        time = x
+        p = p + raRotDec
+        time = p
         h = int(time)
         m = (time*60) %  60
         s = (time*3600) % 60
@@ -107,10 +108,10 @@ def distConverter():
 
     return(distDict)
 
-def dictUpdate():
+def dictUpdate(raRotDec,decRotDec):
     dictionary = {}
-    dictionary.update(decimilDateTimeDEC())
-    dictionary.update(decimilDateTimeRA())
+    dictionary.update(decimilDateTimeDEC(decRotDec))
+    dictionary.update(decimilDateTimeRA(raRotDec))
     dictionary.update(distConverter())
 
     dataFrame = pd.DataFrame(dictionary)
@@ -122,8 +123,11 @@ def dictUpdate():
     print("This is the data size ", df1.shape)
     df2 = df1.loc[df1["dist"] <= (20 * 3.262) ]
     print("This is the new data size ", df2.shape)
-    df2.to_csv('starmaps/finalAngles.csv')
     print("Distance cleaned 1")
+    
+    #modify all ra by global roation
+
+    df2.to_csv('starmaps/finalAngles.csv')
 
     return(dictionary)
 
@@ -255,5 +259,24 @@ def removeDuplicates():
     df = df.drop_duplicates('Rho',keep= 'first')
     df = df.dropna(subset=['proper'],axis=0)
     print(df.shape)
+
+    #for i in range(len(df)):
+        #df = pd.read_csv('starmaps/dataclean.csv')
+
+        #tNum = [(df['X'].iloc[i])]
+        #print(tNum)
+        #tNum = str(tNum)
+        #tNum = tNum.strip("[]")
+        #tNum = float(tNum)
+
+        #bNum = [(df['X'].iloc[i])]
+        #print(bNum)
+        #bNum = str(bNum)
+        #bNum = bNum.strip("[]")
+        #bNum = float(bNum)
+
+        #df = df[~df.iloc[:, 16].between(bNum,tNum,inclusive=False)]
+        #df.to_csv('starmaps/dataclean.csv')
+
     df.to_csv('starmaps/dataclean.csv')
     print("Duplicates Dropped")

@@ -1,6 +1,9 @@
 import pandas as pd
 import numpy as np
+from scipy.spatial import distance
 from PIL import Image, ImageDraw
+import os
+from random import randrange
 
 #layout functions below
 #import data
@@ -103,18 +106,52 @@ def ySetup(scaleFactor, CenterCordHeight, starSize):
     print("and thats Y")
     return(y1, y2)
 
-def nameSetup():
+def textSetup():
     listOfNames = df1['proper'].to_list()
     starName = []
+    listOfSpectra = df1['spect'].to_list()
+    starSpect = []
+    listOfCoordX = df1['X'].to_list()
+    starX = []
+    listOfCoordY = df1['Y'].to_list()
+    starY = []
+    listOfCoordZ = df1['Z'].to_list()
+    starZ = []
 
     for x in listOfNames:
         y = str(x)
         y = y.replace('nan','NA')
         #print(y)
         starName.append(y)
+    
+    for x in listOfSpectra:
+        y = str(x)
+        #print(y)
+        starSpect.append(y)
+
+    for x in listOfCoordX:
+        y = float(x)
+        y = round(y,2)
+        y = str(y)
+        #print(y)
+        starX.append(y)
+
+    for x in listOfCoordY:
+        y = float(x)
+        y = round(y,2)
+        y = str(y)
+        #print(y)
+        starY.append(y)
+
+    for x in listOfCoordZ:
+        y = float(x)
+        y = round(y,2)
+        y = str(y)
+        #print(y)
+        starZ.append(y)
+    
     print("You have a Name and you have a name")
-    #print(starName)
-    return(starName)
+    return(starName,starSpect,starX,starY,starZ)
 
 def canvasSetup(x, y,Color):
 
@@ -211,7 +248,9 @@ def drawStarBackground(draw, x1, y1,x2 ,y2, crossHairSizeH,starName, canvasColor
         draw.rectangle((x1[i]+(crossHairSizeH)+(crossHairSizeH*0.5), y1[i]-(crossHairSizeH),x2[i]+(crossHairSizeH)+(crossHairSizeH*0.5)+textoffset,y2[i]+textoffsety), fill=canvasColor)
     print("so little stars")
 
-def drawStarText (img,draw,data,black_areas,x1,y1,starMain,crossHairSizeH,starName,fontTitle):
+def drawStarText (img,draw,data,black_areas,x1,y1,starMain,crossHairSizeH,starName,fontTitle,starSpect,starX,starY,starZ):
+
+    g = 0
 
     for i in range(len(x1)):
         #use a cross hair
@@ -223,7 +262,133 @@ def drawStarText (img,draw,data,black_areas,x1,y1,starMain,crossHairSizeH,starNa
         #add image with transparency
         img.paste(crossHairColour, (x1[i]-crossHairSizeH,y1[i]-crossHairSizeH), crossHairColour)
 
+        text = starName[g] + '\n' + 'Spect: ' + starSpect[g] + '\n' + 'X: ' + starX[g] + 'Y: ' + starY[g] + 'Z: ' + starZ[g]
+        #write text with name  + starX[i] + starY[i] + starY[i] + starZ[i]
+        draw.multiline_text(((x1[i]+(crossHairSizeH)+(crossHairSizeH*0.5)), y1[i]-(crossHairSizeH)), text ,align="center", font=fontTitle, fill=(0,0,0))
 
-        #write text with name
-        draw.text(((x1[i]+(crossHairSizeH)+(crossHairSizeH*0.5)), y1[i]-(crossHairSizeH)), starName[i],align="center", font=fontTitle, fill=(0,0,0))
+        g = g + 1
+
     print("there are the stars... Hey they are labled")
+
+def findNeighbours(scaleFactor,widthHalf,heightHalf,draw,lineWidth):
+
+    df = pd.read_csv('starmaps/dataclean.csv')
+    print("found data frame")
+
+    #get x,y,z values
+    df1 = df[['X', 'Y', 'Z']]
+
+    #add x y z to new file
+    df1.to_csv('yes.csv')
+    df1 = pd.read_csv('yes.csv')
+    #set up index
+    df1['Key1'] = df1.index
+    #df1.set_index('Unnamed: 0')
+
+    #create test folder
+    isPath = os.path.exists('test')
+    if not isPath:
+        os.makedirs('test')
+
+    print("test directory created")
+
+
+    df1 = df1.astype(np.float64)
+    df1.to_csv('yes.csv')
+    df1 = pd.read_csv('yes.csv')
+
+    df2 = pd.read_csv('yes.csv')
+
+    index = df['index'].tolist()
+    xyzArray = df2[['X', 'Y', 'Z']].to_numpy()
+
+    #find length relitive to every other star
+
+    for i in index:
+        #print(df2)
+        x = df2.iloc[[i]]
+        x = df2.iloc[:,1:]
+        c = distance.cdist(xyzArray,xyzArray, 'euclidean')
+
+    dataFrame = pd.DataFrame(c)
+    dataFrame.to_csv('yea.csv')
+    df = pd.read_csv('yea.csv')
+
+    x = []
+
+    g = 0
+
+    for i in index:
+        filename = 'test/'+str(g)+'.csv'
+        g = g+1
+
+        #divide into rows
+        x = df
+        x = df.iloc[i:i+1,1:]
+        
+        #get 4 min values and transpose table
+        t = x.sort_values(by = [i],axis=1)
+        t = t.iloc[:,:4]
+        Tv = t.T
+        Tv['dist'] = Tv
+        Tv['Key1'] = Tv.index
+        #Tv['key2'] = Tv.index
+
+        #turn every thing to string
+        Tv = Tv.astype(np.float64)
+
+        #merge by index to give x y z values
+        DataMerged = pd.merge(df1,Tv, on=['Key1'],how='inner')
+
+        StartCol = DataMerged['Key1']
+        distCol = DataMerged['dist']
+        xCol = DataMerged['X']
+        yCol = DataMerged['Y']
+        zCol = DataMerged['Z']
+
+        dataFinal = pd.concat([StartCol,distCol,xCol,yCol,zCol],axis=1)
+        dataFinal = dataFinal.set_axis(['starKey','dist','X','Y','Z'],axis=1)
+
+        #save as individual csv's
+        dataFrame = pd.DataFrame(dataFinal)
+        dataFrame.to_csv(filename)
+
+    Name = 0
+
+    for i in index:
+        filename = 'test/'+str(Name)+'.csv'
+        df = pd.read_csv(filename)
+
+        XstarOrigin = df['X'].iat[0]
+        XstarOrigin = (XstarOrigin * scaleFactor) + widthHalf
+        YstarOrigin = df['Y'].iat[0]
+        YstarOrigin = (YstarOrigin * scaleFactor) + heightHalf
+        #ZstarOrigin = df['Z'].iat[0]
+
+        Xstar1 = df['X'].iat[1]
+        Xstar1 = (Xstar1 * scaleFactor) + widthHalf
+        Ystar1 = df['Y'].iat[1]
+        Ystar1 = (Ystar1 * scaleFactor) + heightHalf
+
+        Xstar2 = df['X'].iat[2]
+        Xstar2 = (Xstar2 * scaleFactor) + widthHalf
+        Ystar2 = df['Y'].iat[2]
+        Ystar2 = (Ystar2 * scaleFactor) + heightHalf
+
+        Xstar3 = df['X'].iat[3]
+        Xstar3 = (Xstar3 * scaleFactor) + widthHalf
+        Ystar3 = df['Y'].iat[3]
+        Ystar3 = (Ystar3 * scaleFactor) + heightHalf
+
+        #print(XstarOrigin,Xstar1,Xstar2,Xstar3)
+        #print(YstarOrigin,Ystar1,Ystar2,Ystar3)
+
+        #draw.line([(XstarOrigin,YstarOrigin),(Xstar1,Ystar1)],fill= lineColor,width=20)
+        draw.line([(XstarOrigin,YstarOrigin),(Xstar2,Ystar2)],fill= (randrange(100,256),randrange(100,256),randrange(100,256)),width=(int(lineWidth/2)))
+        draw.line([(XstarOrigin,YstarOrigin),(Xstar3,Ystar3)],fill= (randrange(100,256),randrange(100,256),randrange(100,256)),width=(int(lineWidth/2)))
+
+        os.remove('test/'+str(Name)+'.csv')
+        Name = Name+1
+    os.removedirs('test')
+    os.remove("yea.csv")
+    os.remove("yes.csv")
