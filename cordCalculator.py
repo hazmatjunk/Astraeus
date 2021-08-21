@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import os
 import os.path
 import urllib.request
@@ -6,6 +7,7 @@ import gzip
 import shutil
 import zipfile
 from pandas._config.config import describe_option
+from pandas.core.indexes.base import Index
 
 #Collate data and Conversions
 
@@ -50,13 +52,13 @@ else:
 
 import dataFunctions as ds
 
-if os.path.isfile('starmaps/mapFinale.csv') == True:
+if os.path.isfile('starmaps/dataclean1.csv') == True:
     print("file already here")
 else:
     #import data
     HygData = pd.read_csv('starmaps/hygdata_v3.csv')
     #extract the columns
-    df1 = HygData[['dec', 'ra', 'dist', 'absmag','proper','gl','spect']]
+    df1 = HygData[['dec', 'ra', 'dist', 'absmag','proper','gl','spect','hd']]
 
     #Create lists for later use
 
@@ -64,6 +66,7 @@ else:
     listOfProper = df1['proper'].to_list()
     listOfGliese = df1['gl'].to_list()
     listOfSpectrum = df1['spect'].to_list()
+    listOfHd = df1['hd'].to_list()
 
     #find closest stars in designated range
 
@@ -73,7 +76,7 @@ else:
     ds.dictUpdate()
 
     #clean out distance greater than 20 ly
-    ds.distaneClean(x=distanceFromEarth)
+    #ds.distaneClean(x=distanceFromEarth)
     #Main calculations
 
     ds.RhoPhiTheta()
@@ -87,7 +90,7 @@ else:
 
     #add extra miscllanious data that did not need to be edited
     df = pd.read_csv('starmaps/mapFinale.csv')
-    dicMag = {'abs mag':listOfAbsMag, 'proper':listOfProper, 'gliese':listOfGliese, 'spect':listOfSpectrum}
+    dicMag = {'abs mag':listOfAbsMag, 'proper':listOfProper, 'gliese':listOfGliese,'hd':listOfHd, 'spect':listOfSpectrum}
     df1 = pd.DataFrame(dicMag)
     df = df.join(df1)
     df.to_csv('starmaps/mapFinale.csv')
@@ -100,13 +103,27 @@ else:
 #dataCleanup second
 #data File to clean
 
+#cleaned up everything and move final stuff to dataclean
 ds.spectraClean()
 
 ds.nameMerge()
 
 ds.emptyFill()
 
+df = pd.read_csv('starmaps/dataclean.csv')
+df.insert(loc= 0, column='index', value=np.arange(len(df)))
+df.to_csv('starmaps/dataclean.csv')
+
+ds.distanceCleaner2(x=distanceFromEarth)
+
 cleandata = pd.read_csv('starmaps/dataclean.csv')
+
 ds.unusedClean(x=cleandata)
+
+print(cleandata.shape)
+
+os.remove("starmaps/mapFinale.csv")
+
+ds.removeDuplicates()
 
 print("Data modified and cleaned!")

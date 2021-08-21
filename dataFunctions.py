@@ -118,6 +118,13 @@ def dictUpdate():
 
     print("Dictionarys updated")
 
+    df1 = pd.read_csv('starmaps/finalAngles.csv')
+    print("This is the data size ", df1.shape)
+    df2 = df1.loc[df1["dist"] <= (20 * 3.262) ]
+    print("This is the new data size ", df2.shape)
+    df2.to_csv('starmaps/finalAngles.csv')
+    print("Distance cleaned 1")
+
     return(dictionary)
 
 def RhoPhiTheta():
@@ -176,13 +183,12 @@ def RVECTXYZ():
     df.to_csv('starmaps/mapFinale.csv')
     print("Z found")
 
-def distaneClean(x):
-    df1 = pd.read_csv('starmaps/finalAngles.csv')
-    print("This is the data size ", df1.shape)
-    df2 = df1.loc[df1["dist"] <= (x / 3.262) ]
-    print("This is the new data size ", df2.shape)
-    df2.to_csv('starmaps/finalAngles.csv')
-    print("Distance cleaned 1")
+def distanceCleaner2(x):
+    df = pd.read_csv('starmaps/dataclean.csv')
+    print(df.shape)
+    df2 = df.loc[df["Rho"] <= x]
+    print(df2.shape)
+    df2.to_csv('starmaps/dataclean.csv')
 
 def unusedClean(x):
     df = x
@@ -238,5 +244,16 @@ def spectraClean():
 def nameMerge():
     df = pd.read_csv('starmaps/dataclean.csv')
     df.proper = np.where(df.proper.isnull(),df.gliese, df.proper)
+    df.proper = np.where(df.proper.isnull(),df.hd, df.proper)
     df.to_csv('starmaps/dataclean.csv')
     print("Names Merged")
+
+def removeDuplicates():
+    df = pd.read_csv('starmaps/dataclean.csv')
+    print(df.shape)
+    df.sort_values('Rho', ascending=True,inplace=True)
+    df = df.drop_duplicates('Rho',keep= 'first')
+    df = df.dropna(subset=['proper'],axis=0)
+    print(df.shape)
+    df.to_csv('starmaps/dataclean.csv')
+    print("Duplicates Dropped")

@@ -113,6 +113,7 @@ def nameSetup():
         #print(y)
         starName.append(y)
     print("You have a Name and you have a name")
+    #print(starName)
     return(starName)
 
 def canvasSetup(x, y,Color):
