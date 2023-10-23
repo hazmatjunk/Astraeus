@@ -35,12 +35,14 @@ else:
     os.remove('starmaps/hygdata_v3.csv.gz')
     print("Big Bang complete")
 
-if os.path.isfile('Helvetica.ttf') == True:
+
+#this needs to be fixed
+"""if os.path.isfile('Helvetica.ttf') == True:
         print("We have Ink")
 else:
     print("We need ink. Starting squids")
     urllib.request.urlretrieve("https://dl.freefontsfamily.com/download/Helvetica-Font", "HelveticaFont.zip")
-    with zipfile.ZipFile('HelveticaFont.zip', 'r') as zip_ref:
+    with zipfile.ZipFile('Helvetica-Font.zip', 'r') as zip_ref:
         zip_ref.extractall('')
     os.remove('Helvetica-Bold.ttf')
     os.remove('Helvetica-BoldOblique.ttf')
@@ -50,7 +52,7 @@ else:
     os.remove('helvetica-rounded-bold-5871d05ead8de.otf')
     os.remove('HelveticaFont.zip')
 
-#https://dl.freefontsfamily.com/download/Helvetica-Font
+#https://dl.freefontsfamily.com/download/Helvetica-Font"""
 
 import dataFunctions as ds
 

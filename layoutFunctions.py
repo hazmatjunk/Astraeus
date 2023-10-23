@@ -218,22 +218,24 @@ def gridCreation(img,draw,stepCount,lineColor):
     print("Grid Loaded")
 
 def textOffSetX(draw, starName, fontTitle , i):
-    textoffset = draw.textsize(starName[i], font=fontTitle)
+    textoffset = draw.textlength(starName[i], font=fontTitle)
     textoffset = str(textoffset)
     textoffset = textoffset[1:]
     textoffset = textoffset[:3]
     textoffset = textoffset.rstrip(',')
-    textoffset = int(textoffset)
+    textoffset = int(float(textoffset))
     return(textoffset)
 
 def textOffSetY(draw, starName, fontTitle , i):
-    textoffset = draw.textsize(starName[i], font=fontTitle)
+    textoffset = draw.textlength(starName[i], font=fontTitle)
     textoffset = str(textoffset)
     textoffsety = textoffset
+    print(textoffsety)
     textoffsety = textoffsety.rstrip(')')
     textoffsety = textoffsety[4:]
     textoffsety = textoffsety.lstrip(',')
-    textoffsety = int(textoffsety)
+    print(textoffsety)
+    textoffsety = int(float(textoffsety))
     return(textoffsety)
 
 def drawStarBackground(draw, x1, y1,x2 ,y2, crossHairSizeH,starName, canvasColor, fontTitle):
@@ -243,9 +245,10 @@ def drawStarBackground(draw, x1, y1,x2 ,y2, crossHairSizeH,starName, canvasColor
         draw.ellipse((x1[i]-(crossHairSizeH*4),y1[i]-(crossHairSizeH*4),x2[i]+(crossHairSizeH*4),y2[i]+(crossHairSizeH*4)),fill=canvasColor)
 
         textoffset = textOffSetX(draw= draw, starName= starName, fontTitle= fontTitle, i= i)
-        textoffsety = textOffSetY(draw= draw, starName= starName, fontTitle= fontTitle, i= i)
+        #textoffsety = textOffSetY(draw= draw, starName= starName, fontTitle= fontTitle, i= i)
         #draw a rectangle behind the text
-        draw.rectangle((x1[i]+(crossHairSizeH)+(crossHairSizeH*0.5), y1[i]-(crossHairSizeH),x2[i]+(crossHairSizeH)+(crossHairSizeH*0.5)+textoffset,y2[i]+textoffsety), fill=canvasColor)
+        #draw.rectangle((x1[i]+(crossHairSizeH)+(crossHairSizeH*0.5), y1[i]-(crossHairSizeH),x2[i]+(crossHairSizeH)+(crossHairSizeH*0.5)+textoffset,y2[i]+textoffsety), fill=canvasColor)
+        draw.rectangle((x1[i]+(crossHairSizeH)+(crossHairSizeH*0.5), y1[i]-(crossHairSizeH),x2[i]+(crossHairSizeH)+(crossHairSizeH*0.5)+textoffset,y2[i]), fill=canvasColor)
     print("so little stars")
 
 def drawStarText (img,draw,data,black_areas,x1,y1,starMain,crossHairSizeH,starName,fontTitle,starSpect,starX,starY,starZ):
